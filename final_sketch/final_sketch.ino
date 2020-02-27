@@ -1,94 +1,165 @@
+
+//including the libraries
+#include <AFMotor.h>
+
+//defining pins and variables
+#define left A0
+#define right A1
+#define leftir A2
+#define rightir A3
+
+//defining motors
+AF_DCMotor motor1(1, MOTOR12_1KHZ); 
+AF_DCMotor motor2(2, MOTOR12_1KHZ);
+AF_DCMotor motor3(3, MOTOR34_1KHZ);
+AF_DCMotor motor4(4, MOTOR34_1KHZ);
+
+
+
 void setup() {
-pinMode(2,INPUT); //left ir
- pinMode(3,INPUT); //right ir
- pinMode(4,INPUT);  //left prox
- pinMode(7,INPUT);  //right prox
- pinMode(5,OUTPUT); //Left motor
- pinMode(6,OUTPUT); //left motor
- pinMode(9,OUTPUT); //right motor
- pinMode(10,OUTPUT); //right motor
- pinMode(13,OUTPUT); //led
- pinMode(11,OUTPUT);  //trig
- pinMode(12,INPUT);  //echo
- Serial.begin(9600);  //serial monitor 
+  //declaring pin types
+  pinMode(left,INPUT);
+  pinMode(right,INPUT);
+  pinMode(leftir,INPUT);
+  pinMode(rightir,INPUT);
+  pinMode(11,OUTPUT);  //trig
+  pinMode(12,INPUT);  //echo
+  //begin serial communication
+  Serial.begin(9600);
+  
 }
 
-void loop() {
-int lir,rir,lpr,rpr;
- digitalWrite(11,HIGH);
- delay (50);
- digitalWrite(11,LOW);
- 
- long duration=pulseIn(12,HIGH);  //time duration
-long distance=(duration*0.0343)/2;
-if(distance<5){
-Serial.println("distance=");
-  //Serial.println(distance);
-  digitalWrite(13,HIGH);
-  stp();
-}
-else
-{
-  Serial.println("distance");
-  Serial.println(distance);
-  digitalWrite(13,LOW);
-}
+void loop(){
 
+  digitalWrite(11,HIGH);
+  delay(50);
+  digitalWrite(11,LOW);
 
- lir=digitalRead(2);  //l ir
- rir=digitalRead(3);  //r ir
- lpr=digitalRead(4);  //l prox
- rpr=digitalRead(7);  //r prox
- if(lpr==LOW && rpr==LOW)
- stp();
- else if(lir==LOW && rir==HIGH)
- lft();
- else if(lir==HIGH && rir==LOW)
- rgt();
- else if(lir==HIGH && rir==HIGH)
- fwd();
- if ((lpr==LOW || rpr==LOW) || (lpr==LOW && rpr==LOW))
- digitalWrite(13,HIGH);
- else
- digitalWrite(13,LOW);
+  long duration=pulseIn(12,HIGH);  //time duration
+  long distance=(duration*0.0343)/2;
+  if((distance>5)&&digitalRead(leftir)==0 && digitalRead(rightir)==0)
+  {
+    Serial.println("distance="); //print distance in serial monitor
+    //Forward
+    motor1.run(FORWARD);
+    motor1.setSpeed(150);
+    motor2.run(FORWARD);
+    motor2.setSpeed(150);
+    motor3.run(FORWARD);
+    motor3.setSpeed(150);
+    motor4.run(FORWARD);
+    motor4.setSpeed(150);
+  }
+
+  else if((distance<=5)&&digitalRead(leftir)==1 && digitalRead(rightir)==0)
+  {
+    Serial.println("distance="); //print distance in serial monitor
+    //turn left
+    motor1.run(FORWARD);
+    motor1.setSpeed(200);
+    motor2.run(FORWARD);
+    motor2.setSpeed(200);
+    motor3.run(BACKWARD);
+    motor3.setSpeed(200);
+    motor4.run(BACKWARD);
+    motor4.setSpeed(200);
+  }
+
+  else if((distance<=5)&&digitalRead(leftir)==0 && digitalRead(rightir)==1)
+  {
+    Serial.println("distance="); //print distance in serial monitor
+    //turn right
+    motor1.run(BACKWARD);
+    motor1.setSpeed(200);
+    motor2.run(BACKWARD);
+    motor2.setSpeed(200);
+    motor3.run(FORWARD);
+    motor3.setSpeed(200);
+    motor4.run(FORWARD);
+    motor4.setSpeed(200);
+  }
+
+  else if((distance<=5)&&digitalRead(leftir)==0 && digitalRead(rightir)==0)
+  {
+    Serial.println("distance="); //print distance in serial monitor
+    //turn left
+    motor1.run(FORWARD);
+    motor1.setSpeed(200);
+    motor2.run(FORWARD);
+    motor2.setSpeed(200);
+    motor3.run(BACKWARD);
+    motor3.setSpeed(200);
+    motor4.run(BACKWARD);
+    motor4.setSpeed(200);
+  }
+
+  else if((distance<=5)&&digitalRead(leftir)==0 && digitalRead(rightir)==0)
+  {
+    Serial.println("distance="); //print distance in serial monitor
+    {
+    //turn around
+    motor1.run(FORWARD);
+    motor1.setSpeed(200);
+    motor2.run(FORWARD);
+    motor2.setSpeed(200);
+    motor3.run(BACKWARD);
+    motor3.setSpeed(200);
+    motor4.run(BACKWARD);
+    motor4.setSpeed(200);
+    }
+  
+  //printing values of the sensors to the serial monitor
+  Serial.println(digitalRead(left));
+  
+  Serial.println(digitalRead(right));
+
+  //line detected by both
+  if(digitalRead(left)==0 && digitalRead(right)==0){
+    //Forward
+    motor1.run(FORWARD);
+    motor1.setSpeed(150);
+    motor2.run(FORWARD);
+    motor2.setSpeed(150);
+    motor3.run(FORWARD);
+    motor3.setSpeed(150);
+    motor4.run(FORWARD);
+    motor4.setSpeed(150);
+  }
+  //line detected by left sensor
+  else if(digitalRead(left)==0 && !analogRead(right)==0){
+    //turn left
+    motor1.run(FORWARD);
+    motor1.setSpeed(200);
+    motor2.run(FORWARD);
+    motor2.setSpeed(200);
+    motor3.run(BACKWARD);
+    motor3.setSpeed(200);
+    motor4.run(BACKWARD);
+    motor4.setSpeed(200);
+  }
+  //line detected by right sensor
+  else if(!digitalRead(left)==0 && digitalRead(right)==0){
+    //turn right
+    motor1.run(BACKWARD);
+    motor1.setSpeed(200);
+    motor2.run(BACKWARD);
+    motor2.setSpeed(200);
+    motor3.run(FORWARD);
+    motor3.setSpeed(200);
+    motor4.run(FORWARD);
+    motor4.setSpeed(200);
+  }
+  //line detected by none
+  else if(!digitalRead(left)==0 && !digitalRead(right)==0){
+    //stop
+    motor1.run(RELEASE);
+    motor1.setSpeed(0);
+    motor2.run(RELEASE);
+    motor2.setSpeed(0);
+    motor3.run(RELEASE);
+    motor3.setSpeed(0);
+    motor4.run(RELEASE);
+    motor4.setSpeed(0);
+  }
 }
-
-void fwd()
-{
-  analogWrite(5,150); //left motor
-  analogWrite(6,0);  //left motor
-  analogWrite(9,150); //right motor
-  analogWrite(10,0);  //right motor
-}
-
-void lft()
-{
-  analogWrite(5,0);  //left motor
-  analogWrite(6,0);  //left motor
-  analogWrite(9,150);  //right motor
-  analogWrite(10,0);   //right motor
-}
-
-void rgt()
-{
-  analogWrite(5,150);  //left motor
-  analogWrite(6,0);  //left motor
-  analogWrite(9,0);  //right motor
-  analogWrite(10,0);  //right motor
-}
-
-void stp()
-{
-  analogWrite(5,0);
-  analogWrite(6,0);
-  analogWrite(9,0);
-  analogWrite(10,0);
-}
-
-void bck()
-{
-  analogWrite(5,0);  //left motor
-  analogWrite(6,150);  //left motor
-  analogWrite(9,0);  //right motor
-  analogWrite(10,150);  //right motor
 }
